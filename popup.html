@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* 1. Dark Mode & Theming Support */
+        :root {
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --hover-color: #e0e0e0;
+            --border-color: #ddd;
+            --folder-color: #555;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #202124;
+                --text-color: #e8eaed;
+                --hover-color: #3c4043;
+                --border-color: #5f6368;
+                --folder-color: #9aa0a6;
+            }
+        }
+
+        body {
+            width: 320px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* 2. RTL Support (Automatic based on content) */
+        }
+
+        /* Search Bar Styling */
+        #search-box {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* Folder Styling */
+        .folder-header {
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+            padding: 5px;
+            color: var(--folder-color);
+            display: flex;
+            align-items: center;
+            user-select: none;
+        }
+
+        .folder-header:hover {
+            background-color: var(--hover-color);
+            border-radius: 4px;
+        }
+
+        /* Chevron rotation for open/close */
+        .arrow {
+            margin-inline-end: 8px;
+            /* logical property for RTL/LTR compatibility */
+            transition: transform 0.2s;
+            display: inline-block;
+            font-size: 0.8em;
+        }
+
+        .folder-open .arrow {
+            transform: rotate(90deg);
+        }
+
+        /* Container for children */
+        .folder-content {
+            padding-inline-start: 20px;
+            /* Indent logical property */
+            display: none;
+            /* Hidden by default */
+        }
+
+        /* Bookmark Item Styling */
+        .bookmark-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 4px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .bookmark-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .favicon {
+            width: 16px;
+            height: 16px;
+            margin-inline-end: 8px;
+            flex-shrink: 0;
+        }
+
+        .bookmark-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" id="search-box" placeholder="Search bookmarks...">
+    <div id="bookmarks-container"></div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
