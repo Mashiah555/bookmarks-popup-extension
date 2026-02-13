@@ -2,133 +2,159 @@ document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('bookmarks-container');
     const searchBox = document.getElementById('search-box');
 
-    // We store the "root" nodes in memory so we can restore them
-    // quickly when the user clears the search box.
-    let bookmarksBarContent = [];
-    let flatBookmarksList = [];
+    // Define defaults in case user hasn't visited options yet
+    const defaults = {
+        theme: 'system',
+        language: 'en',
+        viewMode: 'tree',
+        openNewTab: true
+    };
 
-    // 1. Load specifically the "Bookmarks Bar" (ID '1')
-    chrome.bookmarks.getSubTree('1', function (results) {
-        if (chrome.runtime.lastError || !results || !results.length) {
-            container.textContent = "Could not load bookmarks.";
-            return;
-        }
-
-        // results[0] is the "Bookmarks Bar" folder itself.
-        // We want its children (the actual items inside).
-        bookmarksBarContent = results[0].children;
-
-        // Render the tree starting directly from the contents
-        renderTree(bookmarksBarContent, container);
-
-        // Create a flat index for searching
-        flattenBookmarks(bookmarksBarContent);
+    // 1. Fetch Settings FIRST
+    chrome.storage.sync.get(defaults, (settings) => {
+        applySettings(settings); // Apply theme, language, etc.
+        loadBookmarks(settings); // Pass settings to render logic
     });
 
-    // 2. Search Listener
-    searchBox.addEventListener('input', function (e) {
-        const query = e.target.value.toLowerCase();
-        container.innerHTML = ''; // Clear current view
+    // UI Locals for Search
+    const uiStrings = {
+        en: { search: "Search bookmarks...", noResult: "No results found." },
+        he: { search: "חפש סימניות...", noResult: "לא נמצאו תוצאות." }
+    };
 
-        if (query.trim() === '') {
-            // Restore the original folder view
-            renderTree(bookmarksBarContent, container);
-        } else {
-            // Filter the flat list and show matches
-            const matches = flatBookmarksList.filter(b => b.title && b.title.toLowerCase().includes(query));
+    function applySettings(settings) {
+        const html = document.documentElement;
+        const body = document.body;
 
-            if (matches.length === 0) {
-                const noResult = document.createElement('div');
-                noResult.textContent = "No results found.";
-                noResult.style.padding = "10px";
-                noResult.style.color = "#888";
-                container.appendChild(noResult);
+        // A. Language / Direction
+        html.lang = settings.language;
+        html.dir = settings.language === 'he' ? 'rtl' : 'ltr';
+        searchBox.placeholder = uiStrings[settings.language].search;
+
+        // B. Theme
+        body.className = ''; // Reset
+        if (settings.theme === 'system') {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                body.classList.add('theme-dark');
             } else {
-                matches.forEach(node => renderBookmark(node, container));
+                body.classList.add('theme-light');
             }
+        } else {
+            body.classList.add(`theme-${settings.theme}`);
         }
-    });
 
-    // Helper: Flatten tree for search
-    function flattenBookmarks(nodes) {
-        if (!nodes) return;
-        for (let node of nodes) {
-            if (node.children) {
-                flattenBookmarks(node.children);
-            } else if (node.url) {
-                flatBookmarksList.push(node);
+        // C. View Mode (Add class to container)
+        container.className = `view-${settings.viewMode}`;
+    }
+
+    function loadBookmarks(settings) {
+        let flatBookmarksList = [];
+        let bookmarksBarContent = [];
+
+        // Load "Bookmarks Bar" (ID '1')
+        chrome.bookmarks.getSubTree('1', function (results) {
+            if (!results || !results.length) return;
+            bookmarksBarContent = results[0].children;
+
+            // Render with user settings
+            renderTree(bookmarksBarContent, container, settings);
+            flattenBookmarks(bookmarksBarContent);
+        });
+
+        // Search Listener
+        searchBox.addEventListener('input', function (e) {
+            const query = e.target.value.toLowerCase();
+            container.innerHTML = '';
+
+            if (query.trim() === '') {
+                renderTree(bookmarksBarContent, container, settings);
+            } else {
+                const matches = flatBookmarksList.filter(b => b.title && b.title.toLowerCase().includes(query));
+                if (matches.length === 0) {
+                    container.textContent = uiStrings[settings.language].noResult;
+                } else {
+                    matches.forEach(node => renderBookmark(node, container, settings));
+                }
+            }
+        });
+
+        function flattenBookmarks(nodes) {
+            if (!nodes) return;
+            for (let node of nodes) {
+                if (node.children) flattenBookmarks(node.children);
+                else if (node.url) flatBookmarksList.push(node);
             }
         }
     }
 });
 
-// 3. Render Functions (unchanged logic, just organizing)
-function renderTree(nodes, parentElement) {
+// Render Functions
+function renderTree(nodes, parentElement, settings) {
     if (!nodes) return;
     for (let node of nodes) {
         if (node.children) {
-            renderFolder(node, parentElement);
+            renderFolder(node, parentElement, settings);
         } else if (node.url) {
-            renderBookmark(node, parentElement);
+            renderBookmark(node, parentElement, settings);
         }
     }
 }
 
-function renderFolder(node, parentElement) {
+function renderFolder(node, parentElement, settings) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'node-wrapper';
+
     const header = document.createElement('div');
     header.className = 'folder-header';
-    header.setAttribute('dir', 'auto');
 
     const arrow = document.createElement('span');
-    arrow.textContent = '▶';
+    arrow.textContent = settings.language === 'he' ? '◀' : '▶';
     arrow.className = 'arrow';
-    header.appendChild(arrow);
 
-    // Folder Icon
     const icon = document.createTextNode(' \uD83D\uDCC1 ');
-    header.appendChild(icon);
-
     const title = document.createTextNode(node.title);
-    header.appendChild(title);
 
-    parentElement.appendChild(header);
+    header.appendChild(arrow);
+    header.appendChild(icon);
+    header.appendChild(title);
+    wrapper.appendChild(header);
 
     const content = document.createElement('div');
     content.className = 'folder-content';
-    parentElement.appendChild(content);
+    wrapper.appendChild(content);
 
-    // Recurse
-    renderTree(node.children, content);
+    parentElement.appendChild(wrapper);
 
-    // Toggle Click
+    renderTree(node.children, content, settings);
+
     header.addEventListener('click', function () {
         header.classList.toggle('folder-open');
-        if (header.classList.contains('folder-open')) {
-            arrow.style.transform = 'rotate(90deg)';
-        } else {
-            arrow.style.transform = 'rotate(0deg)';
-        }
-        // Toggle visibility of the content div immediately following the header
-        const contentDiv = header.nextElementSibling;
-        if (contentDiv) {
-            contentDiv.style.display = header.classList.contains('folder-open') ? 'block' : 'none';
-        }
+        const isOpen = header.classList.contains('folder-open');
+
+        // Rotate Arrow logic
+        if (isOpen) arrow.style.transform = 'rotate(90deg)';
+        else arrow.style.transform = 'rotate(0deg)';
+
+        content.style.display = isOpen ? 'block' : 'none';
     });
 }
 
-function renderBookmark(node, parentElement) {
+function renderBookmark(node, parentElement, settings) {
     const link = document.createElement('a');
     link.href = node.url;
     link.className = 'bookmark-item';
-    link.target = "_blank";
-    link.setAttribute('dir', 'auto');
+    // Apply "Open in New Tab" setting
+    link.target = settings.openNewTab ? "_blank" : "_self";
+
+    // Tooltip Text
+    link.title = `${node.title}\n${node.url}`;
 
     // Favicon
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(node.url).hostname}`;
     const img = document.createElement('img');
-    img.src = faviconUrl;
+    img.src = `https://www.google.com/s2/favicons?domain=${new URL(node.url).hostname}&sz=32`;
     img.className = 'favicon';
 
+    // Text Label
     const textSpan = document.createElement('span');
     textSpan.textContent = node.title || node.url;
     textSpan.className = 'bookmark-text';

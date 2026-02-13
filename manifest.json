@@ -1,14 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Bookmarks Popup",
-  "version": "0.2.1",
+  "version": "0.3.3",
   "description": "Access bookmarks from a modern popup to save screen space.",
   "permissions": [
-    "bookmarks" 
+    "bookmarks",
+    "storage"
   ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Open Bookmarks"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
   },
   "icons": {
     "128": "icon.png"

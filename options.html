@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Extension Settings</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            width: 300px;
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .option-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="checkbox"] {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 5px;
+        }
+
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #357ae8;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: green;
+            font-size: 0.9em;
+            height: 1.2em;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Settings</h2>
+
+    <div class="option-group">
+        <label for="theme">Theme / ערכת נושא</label>
+        <select id="theme">
+            <option value="system">System Default</option>
+            <option value="light">Light / בהיר</option>
+            <option value="dark">Dark / כהה</option>
+        </select>
+    </div>
+
+    <div class="option-group">
+        <label for="language">Language / שפה</label>
+        <select id="language">
+            <option value="en">English (LTR)</option>
+            <option value="he">Hebrew (RTL)</option>
+        </select>
+    </div>
+
+    <div class="option-group">
+        <label for="viewMode">View Mode / תצוגה</label>
+        <select id="viewMode">
+            <option value="tree">Tree View (List)</option>
+            <option value="grid">Grid View (Cards)</option>
+        </select>
+    </div>
+
+    <div class="option-group">
+        <label for="openNewTab">Behavior</label>
+        <div style="display: flex; align-items: center;">
+            <input type="checkbox" id="openNewTab" style="width: auto; margin-right: 10px;">
+            <span>Always open in new tab</span>
+        </div>
+    </div>
+
+    <div id="status"></div>
+    <button id="save">Save Settings</button>
+
+    <script src="options.js"></script>
+</body>
+
+</html>

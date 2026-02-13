@@ -4,117 +4,162 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* 1. Dark Mode & Theming Support */
+        /* VARIABLES (Default Light) */
         :root {
-            --bg-color: #f9f9f9;
+            --bg-color: #ffffff;
             --text-color: #333;
-            --hover-color: #e0e0e0;
+            --hover-color: #f0f0f0;
             --border-color: #ddd;
-            --folder-color: #555;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #202124;
-                --text-color: #e8eaed;
-                --hover-color: #3c4043;
-                --border-color: #5f6368;
-                --folder-color: #9aa0a6;
-            }
+        /* THEMES */
+        body.theme-dark {
+            --bg-color: #202124;
+            --text-color: #e8eaed;
+            --hover-color: #3c4043;
+            --border-color: #5f6368;
+        }
+
+        body.theme-light {
+            --bg-color: #ffffff;
+            --text-color: #333;
+            --hover-color: #f0f0f0;
         }
 
         body {
             width: 320px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 10px;
             background-color: var(--bg-color);
             color: var(--text-color);
-            /* 2. RTL Support (Automatic based on content) */
+            font-family: 'Segoe UI', Tahoma, sans-serif;
         }
 
-        /* Search Bar Styling */
+        /* RTL Support */
+        html[dir="rtl"] body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
         #search-box {
             width: 100%;
             padding: 8px;
+            margin-bottom: 10px;
             box-sizing: border-box;
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
             border-radius: 4px;
-            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
             color: var(--text-color);
         }
 
-        /* Folder Styling */
-        .folder-header {
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 5px;
-            padding: 5px;
-            color: var(--folder-color);
+        /* ===========================
+       VIEW MODE: TREE (Default) 
+       =========================== */
+        .view-tree .folder-content {
+            padding-inline-start: 15px;
+            display: none;
+            border-inline-start: 1px solid var(--border-color);
+            /* Guide line */
+        }
+
+        .view-tree .folder-header,
+        .view-tree .bookmark-item {
+            padding: 6px;
             display: flex;
             align-items: center;
-            user-select: none;
-        }
-
-        .folder-header:hover {
-            background-color: var(--hover-color);
+            cursor: pointer;
             border-radius: 4px;
+            text-decoration: none;
+            color: var(--text-color);
         }
 
-        /* Chevron rotation for open/close */
-        .arrow {
+        .view-tree .folder-header:hover,
+        .view-tree .bookmark-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .view-tree .arrow {
             margin-inline-end: 8px;
-            /* logical property for RTL/LTR compatibility */
-            transition: transform 0.2s;
             display: inline-block;
+            transition: 0.2s;
             font-size: 0.8em;
         }
 
-        .folder-open .arrow {
-            transform: rotate(90deg);
+        .view-tree .favicon {
+            width: 16px;
+            margin-inline-end: 8px;
         }
 
-        /* Container for children */
-        .folder-content {
-            padding-inline-start: 20px;
-            /* Indent logical property */
+        /* ===========================
+       VIEW MODE: GRID (Fixed Columns)
+       =========================== */
+
+        .view-grid .folder-content {
             display: none;
-            /* Hidden by default */
+            /* FORCE 5 items per row. 
+         (320px width / 5 = ~54px per card, perfect for 32px icons) */
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 8px 0;
+            /* Vertical padding only */
         }
 
-        /* Bookmark Item Styling */
-        .bookmark-item {
+        .view-grid .node-wrapper .folder-open~.folder-content {
+            display: grid;
+        }
+
+        /* Grid Items */
+        .view-grid .bookmark-item {
+            aspect-ratio: 1 / 1;
+            /* Forces Perfect Square */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background-color: var(--bg-color);
+            border: 1px solid transparent;
+            border-radius: 6px;
+
+            text-decoration: none;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .view-grid .bookmark-item:hover {
+            background-color: var(--hover-color);
+            border-color: var(--border-color);
+            transform: scale(1.05);
+            /* Subtle pop */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Icons - Large and Centered */
+        .view-grid .favicon {
+            width: 32px;
+            height: 32px;
+            margin: 0;
+            object-fit: contain;
+        }
+
+        /* HIDE text */
+        .view-grid .bookmark-text {
+            display: none;
+        }
+
+        /* Folder Headers (unchanged) */
+        .view-grid .folder-header {
+            padding: 8px;
+            background: var(--hover-color);
+            margin-top: 5px;
+            font-weight: bold;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            padding: 6px 8px;
-            text-decoration: none;
-            color: var(--text-color);
             border-radius: 4px;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .bookmark-item:hover {
-            background-color: var(--hover-color);
-        }
-
-        .favicon {
-            width: 16px;
-            height: 16px;
-            margin-inline-end: 8px;
-            flex-shrink: 0;
-        }
-
-        .bookmark-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
     </style>
 </head>
 
 <body>
-    <input type="text" id="search-box" placeholder="Search bookmarks...">
+    <input type="text" id="search-box">
     <div id="bookmarks-container"></div>
     <script src="popup.js"></script>
 </body>
