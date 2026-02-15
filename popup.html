@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* VARIABLES (Default Light) */
+        /* ===========================
+           GLOBAL VARIABLES & RESET
+           =========================== */
         :root {
             --bg-color: #ffffff;
             --text-color: #333;
@@ -12,18 +14,11 @@
             --border-color: #ddd;
         }
 
-        /* THEMES */
         body.theme-dark {
             --bg-color: #202124;
             --text-color: #e8eaed;
             --hover-color: #3c4043;
             --border-color: #5f6368;
-        }
-
-        body.theme-light {
-            --bg-color: #ffffff;
-            --text-color: #333;
-            --hover-color: #f0f0f0;
         }
 
         body {
@@ -34,9 +29,15 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
         }
 
-        /* RTL Support */
-        html[dir="rtl"] body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+        /* Common Utilities */
+        .favicon {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
         }
 
         #search-box {
@@ -50,66 +51,73 @@
             color: var(--text-color);
         }
 
-        /* ===========================
-       VIEW MODE: TREE (Default) 
-       =========================== */
-        .view-tree .folder-content {
-            padding-inline-start: 15px;
+        /* ==================================================
+           MODE 1: TREE VIEW (List Style)
+           ================================================== */
+
+        /* Only apply these rules if body has .view-tree */
+
+        body.view-tree .folder-content {
             display: none;
+            padding-inline-start: 15px;
             border-inline-start: 1px solid var(--border-color);
-            /* Guide line */
         }
 
-        .view-tree .folder-header,
-        .view-tree .bookmark-item {
+        body.view-tree .folder-open+.folder-content {
+            display: block;
+        }
+
+        /* List Item Styling */
+        body.view-tree .folder-header,
+        body.view-tree .bookmark-item {
             padding: 6px;
             display: flex;
             align-items: center;
             cursor: pointer;
             border-radius: 4px;
-            text-decoration: none;
-            color: var(--text-color);
         }
 
-        .view-tree .folder-header:hover,
-        .view-tree .bookmark-item:hover {
+        body.view-tree .folder-header:hover,
+        body.view-tree .bookmark-item:hover {
             background-color: var(--hover-color);
         }
 
-        .view-tree .arrow {
-            margin-inline-end: 8px;
-            display: inline-block;
-            transition: 0.2s;
-            font-size: 0.8em;
-        }
-
-        .view-tree .favicon {
+        body.view-tree .favicon {
             width: 16px;
-            margin-inline-end: 8px;
+            height: 16px;
         }
 
-        /* ===========================
-       VIEW MODE: GRID (Fixed Columns)
-       =========================== */
 
-        .view-grid .folder-content {
-            display: none;
-            /* FORCE 5 items per row. 
-         (320px width / 5 = ~54px per card, perfect for 32px icons) */
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            padding: 8px 0;
-            /* Vertical padding only */
-        }
+        /* ==================================================
+           MODE 2: GRID VIEW (Icon Tiles)
+           ================================================== */
 
-        .view-grid .node-wrapper .folder-open~.folder-content {
+        /* 1. LAYOUT: Apply 5-column grid to Root Container AND Sub-folders */
+        body.view-grid #bookmarks-container,
+        body.view-grid .folder-open+.folder-content {
             display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            /* Force 5 cols */
+            gap: 8px;
+            padding: 4px 0;
+            align-content: start;
         }
 
-        /* Grid Items */
-        .view-grid .bookmark-item {
+        /* 2. VISIBILITY: Folders hidden by default */
+        body.view-grid .folder-content {
+            display: none;
+        }
+
+        /* 3. FOLDER HEADERS: Must span full width */
+        body.view-grid .node-wrapper {
+            grid-column: 1 / -1;
+            /* Spans all 5 columns */
+            width: 100%;
+        }
+
+        /* 4. BOOKMARK TILES (Unified for Root and Folders) */
+        body.view-grid .bookmark-item {
             aspect-ratio: 1 / 1;
-            /* Forces Perfect Square */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -118,34 +126,35 @@
             border: 1px solid transparent;
             border-radius: 6px;
 
-            text-decoration: none;
+            /* Ensure text is hidden and box is square */
+            min-width: 0;
             transition: all 0.1s ease;
-            cursor: pointer;
         }
 
-        .view-grid .bookmark-item:hover {
+        /* Hover Effect */
+        body.view-grid .bookmark-item:hover {
             background-color: var(--hover-color);
             border-color: var(--border-color);
-            transform: scale(1.05);
-            /* Subtle pop */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
         }
 
-        /* Icons - Large and Centered */
-        .view-grid .favicon {
+        /* Large Icons */
+        body.view-grid .favicon {
             width: 32px;
             height: 32px;
             margin: 0;
             object-fit: contain;
         }
 
-        /* HIDE text */
-        .view-grid .bookmark-text {
+        /* HIDE TEXT in grid mode */
+        body.view-grid .bookmark-text {
             display: none;
         }
 
-        /* Folder Headers (unchanged) */
-        .view-grid .folder-header {
+        /* Folder Header Styling (Bar) */
+        body.view-grid .folder-header {
             padding: 8px;
             background: var(--hover-color);
             margin-top: 5px;

@@ -43,8 +43,9 @@ document.addEventListener('DOMContentLoaded', function () {
             body.classList.add(`theme-${settings.theme}`);
         }
 
-        // C. View Mode (Add class to container)
-        container.className = `view-${settings.viewMode}`;
+        // C. View Mode
+        body.classList.remove('view-tree', 'view-grid');
+        body.classList.add(`view-${settings.viewMode}`);
     }
 
     function loadBookmarks(settings) {
@@ -129,13 +130,10 @@ function renderFolder(node, parentElement, settings) {
 
     header.addEventListener('click', function () {
         header.classList.toggle('folder-open');
+
+        // 2. Rotate the arrow logic
         const isOpen = header.classList.contains('folder-open');
-
-        // Rotate Arrow logic
-        if (isOpen) arrow.style.transform = 'rotate(90deg)';
-        else arrow.style.transform = 'rotate(0deg)';
-
-        content.style.display = isOpen ? 'block' : 'none';
+        arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
     });
 }
 
