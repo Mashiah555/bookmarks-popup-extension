@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bookmarks Popup",
-  "version": "0.3.6",
+  "version": "0.3.10",
   "description": "Access bookmarks from a modern popup to save screen space.",
   "permissions": [
     "bookmarks",
@@ -9,13 +9,24 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Open Bookmarks"
+    "default_title": "Open Bookmarks",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png",
+      "1297": "icon1297.png"
+    }
   },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": false
   },
   "icons": {
-    "128": "icon.png"
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png",
+    "1297": "icon1297.png"
   }
 }

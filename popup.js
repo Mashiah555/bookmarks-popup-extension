@@ -141,18 +141,29 @@ function renderBookmark(node, parentElement, settings) {
     const link = document.createElement('a');
     link.href = node.url;
     link.className = 'bookmark-item';
-    // Apply "Open in New Tab" setting
-    link.target = settings.openNewTab ? "_blank" : "_self";
-
-    // Tooltip Text
     link.title = `${node.title}\n${node.url}`;
 
-    // Favicon
+    link.addEventListener('click', function (event) {
+        // 1. Stop the browser from trying to open the link normally
+        event.preventDefault();
+
+        // 2. Use the Chrome API to handle the navigation
+        if (settings.openNewTab) {
+            // Opens a brand new tab
+            chrome.tabs.create({ url: node.url });
+        } else {
+            // Changes the URL of the current active tab
+            chrome.tabs.update({ url: node.url });
+        }
+
+        // 3. Close the popup after navigation
+        window.close();
+    });
+
     const img = document.createElement('img');
     img.src = `https://www.google.com/s2/favicons?domain=${new URL(node.url).hostname}&sz=32`;
     img.className = 'favicon';
 
-    // Text Label
     const textSpan = document.createElement('span');
     textSpan.textContent = node.title || node.url;
     textSpan.className = 'bookmark-text';
